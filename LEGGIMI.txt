@@ -1,0 +1,232 @@
+AUTOASTROPIPE (AAP) 2.6 - dall'immagine FITS grezza all'analisi scientifica
+==========================================================================
+© 2026 Edoardo Battistel          (fino alla versione 1.4 si chiamava "Pipeline FITS")
+
+Per FITS di telescopi spaziali e a terra, in qualsiasi banda (UV, visibile,
+infrarosso, raggi X...). Funziona su Ubuntu/Linux e Windows 11.
+
+File di questa cartella
+-----------------------
+  autoastropipe.py             il programma (finestra)
+  motore_aap.py                i calcoli (deve stare accanto ad autoastropipe.py)
+  roman_asdf.py                lettura dei file .asdf del telescopio Roman (accanto agli altri due)
+  rifinitura.py                rifinitura a colori (sezione 7)
+  autoastropipe.png / .ico     icona del programma (Ubuntu / Windows)
+  openngc_compatto.csv         catalogo NGC/IC/Messier per gli oggetti con nome senza Internet
+  OpenNGC_licenza_CC-BY-SA-4.0.txt  licenza del catalogo (OpenNGC di Mattia Verga,
+                               https://github.com/mattiaverga/OpenNGC)
+  crea_eseguibile_ubuntu.sh    crea l'eseguibile AutoAstroPipe per Ubuntu
+  crea_eseguibile_windows.bat  crea AutoAstroPipe.exe per Windows 11
+  documentazione/              manuale completo in .docx e .pdf
+
+Creare l'eseguibile (una volta per sistema)
+-------------------------------------------
+UBUNTU:   cd ~/Claude/Astropy/programma_autoastropipe/versione_2.6
+          bash crea_eseguibile_ubuntu.sh
+WINDOWS:  installa Python da python.org ("Add python.exe to PATH"),
+          poi doppio clic su crea_eseguibile_windows.bat
+Alla fine viene eseguito un AUTOTEST completo (deve dire "AUTOTEST SUPERATO"):
+apre per qualche secondo anche la finestra del programma per provarla.
+Le vecchie icone "Pipeline FITS" vengono tolte dal menu e dalla Scrivania.
+
+Barra dei menu
+--------------
+  File          Nuova analisi... (Ctrl+N)   chiede la cartella madre di una nuova
+                                            analisi; quella attuale resta salvata
+                Apri una cartella madre... (Ctrl+O)  riprende un'analisi salvata
+                Salva i progressi (Ctrl+S)  salva scelte, log e aap_scelte.csv
+                Esporta le scelte in CSV
+                Esci (Ctrl+Q)
+  Opzioni       Ingrandisci / Riduci il testo, Testo normale (Ctrl + / Ctrl − / Ctrl 0)
+                Anteprime più grandi / più piccole
+                Firma © sulle immagini salvate
+                Dopo la prima scelta passa da solo al file successivo
+  Step          vai direttamente a una delle 7 sezioni (anche Alt+1 ... Alt+7
+                oppure la tendina "Step" in alto a destra)
+  Informazioni  versione e autore; dove sono i file dell'analisi
+
+All'avvio il programma riapre l'ultima analisi, per continuare da dove eri rimasto.
+
+Le sezioni (si aprono e chiudono con un clic sul titolo)
+--------------------------------------------------------
+1. CARTELLA MADRE E FILE
+   - "Scegli la cartella madre": la cartella con i FITS (anche in sottocartelle).
+   - "Rinomina e copia": ogni FITS prende il nome del suo filtro (f090.fits,
+     f1130.fits; doppioni f090a, f090b) e viene copiato nella cartella madre,
+     verificando che la copia sia identica. Poi chiede se cancellare gli originali.
+   - Tabella dei file: clic su una riga = includi / escludi.
+   - Memoria: Ibrida (consigliata), Solo RAM (veloce), Solo disco (poca RAM).
+
+2. RIDUZIONE DEL RUMORE  -  3. SOTTRAZIONE DEL FONDO  -  4. STRETCHING
+   Per ogni file: scegli algoritmo e valori, premi "Calcola le anteprime" e
+   CLICCA sull'immagine migliore. La scelta viene salvata.
+   - La PRIMA scelta di un file passa da sola al file successivo.
+   - Se il file aveva già una scelta, cliccando un'altra anteprima la scelta
+     cambia e si RESTA sullo stesso file (niente avanti e indietro).
+   - Quando tutti i file hanno una scelta, il programma chiede se passare allo
+     step successivo.
+   Anteprime piccole? Usa "Anteprime − / +" sopra le immagini: con + le
+   anteprime diventano più grandi (meno per riga) e si scorrono con la barra
+   o la rotellina.
+   Sopra le immagini ci sono i pulsanti grandi Intera, ◀, ▶, Sposta, Zoom,
+   Salva (al posto delle icone piccole). Sposta e Zoom diventano arancioni
+   quando sono attivi: ripremili per tornare a cliccare sulle anteprime.
+
+5. STACK IN BIANCO E NERO  -  6. STACK RGB  -  7. ANALISI SCIENTIFICHE
+   Come nella versione 1.4 (riproiezione WCS, ritaglio a mano o automatico,
+   colorazione cromatica, analisi e oggetti con nome con SIMBAD o OpenNGC).
+   Dopo ogni salvataggio di stack B/N e RGB viene scritto anche aap_scelte.csv.
+
+Immagini a raggi X (Chandra, XMM-Newton...)  — novità della 2.1
+---------------------------------------------
+  Vengono riconosciute da sole (nella tabella il filtro ha « · X», λ in keV).
+  Lo 0 resta un dato valido (nessun fotone): sono "senza dati" solo i pixel
+  fuori dal rivelatore. Niente zone rovinate inventate, fondo e rumore
+  calcolati dentro il rivelatore.
+  Chandra fornisce "cntr_img2" (centro a piena risoluzione) e "full_img2"
+  (tutto il campo, ridotto 8 volte): la seconda è un doppione ed è esclusa di
+  base (clic sulla riga per includerla).
+  Rumore: usa la sfocatura gaussiana; per questi file le anteprime aggiungono
+  da sole i valori 4, 6, 8 pixel.
+  Analisi: tutte funzionano sugli stack con file X; in più "Raggi X: conteggi,
+  flusso e profilo" lavora sui fotoni originali (fotoni al secondo, mappa del
+  flusso, profilo di brillanza con errori di Poisson) e scrive analisi_raggi_x.csv.
+
+Rifinitura a colori (sezione 7)  — novità della 2.3
+-------------------------------
+  Dopo l'RGB (sezione 6) la sezione 7 rende l'immagine simile a quelle
+  pubblicate dalla NASA e dall'ESA, che gli specialisti dello STScI rifiniscono
+  a mano in PixInsight e Photoshop. Qui gli stessi passaggi sono automatici e
+  regolabili con le barre, con l'anteprima che cambia subito:
+    - Colori fedeli (Lupton et al. 2004, consigliato): i filtri restano lineari
+      (in unità di rumore) e vengono tirati tutti insieme con lo stretching
+      asinh: stelle e galassie non sbiadiscono verso il bianco. La prima volta
+      i filtri vengono rielaborati in forma lineare (richiede qualche minuto).
+      In alternativa "Classico" usa le immagini tirate filtro per filtro.
+    - Fondo cielo neutro: toglie lo sfondo bluastro o verdognolo (il fondo di
+      ogni canale viene portato allo stesso grigio scuro) e bilancia il bianco.
+    - Rumore a colori e di luminosità: toglie la grana colorata del fondo.
+    - Mezzitoni, contrasto, saturazione, contrasto locale, nitidezza.
+    - Riduzione delle stelle e riparazione dei centri neri delle stelle sature.
+  "Anteprima al 100%" mostra un riquadro alla risoluzione vera, per giudicare
+  grana e stelle; con l'anteprima intera un clic sceglie la zona.
+  Salva stack_rgb_rifinito.fits (con WCS) e l'immagine, a piena risoluzione.
+  Le analisi scientifiche sono diventate la sezione 8.
+
+Oggetti con nome (analisi della sezione 8)
+------------------------------------------
+  SIMBAD (server di Strasburgo, poi copia di Harvard) e NED (NASA/IPAC
+  Extragalactic Database) vengono interrogati insieme: un oggetto trovato da
+  entrambi compare una volta sola (quello di SIMBAD, con il redshift di NED se
+  gli manca); quelli solo in NED si aggiungono. Senza Internet resta il
+  catalogo NGC/IC/Messier incluso. Sull'immagine solo i nomi; tipo, coordinate,
+  riferimenti e redshift sono nel CSV oggetti_nel_campo.csv. Nei campi
+  profondi (XDF, HUDF, CANDELS) non ci sono oggetti NGC/IC: è normale.
+  La diagnostica (--diagnostica) prova SIMBAD, NED e i dati della mappa del cielo.
+
+Novità della 2.6
+----------------
+  - Lingua inglese: menu Opzioni → «Lingua / Language» (Italiano / English),
+    poi riavvia il programma. In inglese sono tradotti finestre, menu, pulsanti,
+    messaggi, registro e tutte le scritte delle immagini delle analisi.
+    Restano in italiano i nomi dei file creati (stack_bn, analisi_...) e le
+    colonne dei CSV. File: lingua.py (meccanismo) e lingua_en.py (dizionario).
+  - Manuale aggiornato alla 2.6, in italiano e in inglese (cartella documentazione).
+
+Novità della 2.5
+----------------
+  - SPHEREx: i cubi spettrali DR1 vengono riconosciuti anche quando contengono
+    tabelle (SPECTRAL_CHANNELS) e divisi nelle 6 bande D1-D6.
+  - Sezione 5: «Uniforma la luminosità dei file prima di unirli» (fondo e parti
+    brillanti di tutti i filtri agli stessi livelli). Il file di riferimento
+    sceglie solo la griglia, non la luminosità.
+  - Sezione 7: tre nuovi metodi di colore oltre a Lupton e Classico:
+    «Automatico per canale» (come lo STF di PixInsight: ogni filtro tirato per
+    conto suo, fondo neutro, adatto a WISE e all'infrarosso), «Logaritmico
+    morbido» (Trilogy di Dan Coe) e «Asinh per canale» (colori accesi).
+  - Sezione 8: più formati delle immagini insieme.
+  - Ritaglio (sezione 5): due ritagli automatici, «solo la zona piena» (come
+    prima) e «tieni tutti i dati» (toglie solo il vuoto esterno: adatto ai campi
+    irregolari di JWST e HST). Il rettangolo a mano si disegna anche se Zoom o
+    Sposta erano attivi.
+  - Cubi SPHEREx anche direttamente nella cartella madre: il programma propone
+    di dividerli in bande.
+  - Mosaici con grandi bordi vuoti (es. Spitzer SMOG, 94% senza dati): il
+    programma lavora solo sul riquadro che contiene dati (coordinate invariate).
+  - Analisi: il titolo sta sopra la figura e non si sovrappone più alle
+    coordinate (immagini ruotate o molto larghe, es. Herschel).
+
+Novità della 2.4
+----------------
+  - Missioni senza la parola FILTER nell'intestazione: Pan-STARRS (g r i z y,
+    pixel in scala asinh riportati al flusso lineare), SPHEREx (rivelatori
+    D1-D6, 0,75-5 µm), WISE / NEOWISE / unWISE (W1-W4), Spitzer IRAC (3,6-8 µm)
+    e MIPS (24, 70, 160 µm), Herschel PACS (70, 100, 160 µm) e SPIRE (250, 350,
+    500 µm). Lunghezza d'onda anche dalle parole chiave WAVELEN / WAVELNTH.
+    File compressi .fits.fz e .bz2 riconosciuti.
+  - Formati: «JPEG per forum» rimpicciolisce l'immagine e sceglie la qualità
+    più alta che sta nel peso massimo (Opzioni → JPEG per forum: lato massimo
+    e peso massimo, normalmente 2048 px e 1000 kB). File: stack_bn_forum.jpg...
+  - Stack B/N, RGB e rifinitura: caselle per salvare più formati insieme
+    (FITS, TIFF, PNG, JPEG, JPEG per forum); il FITS si può togliere se è già
+    stato salvato e servono solo le immagini.
+  - Analisi «Posizione nel cielo»: mappa della costellazione che contiene
+    l'immagine, nello stile delle carte IAU / Sky & Telescope (costellazione in
+    bianco, figure in verde, confini punteggiati, stelle fino alla magnitudine
+    6 con lettere greche e nomi, eclittica in azzurro, campo in rosso) e
+    posizione_nel_cielo.csv con costellazione e stelle con nome più vicine.
+    Dati d3-celestial (BSD): inclusi nella compilazione, altrimenti scaricati
+    una volta sola in ~/.cache/autoastropipe/dati_cielo.
+
+Icona
+-----
+  Lo script di installazione mette l'icona di AutoAstroPipe (galassia a
+  spirale con la sigla AAP) nel menu delle applicazioni e sulla Scrivania.
+  La prima volta: tasto destro sull'icona della Scrivania -> "Consenti avvio".
+
+Telescopio spaziale Roman (file .asdf)  — novità della 2.2
+---------------------------------------
+  Il Nancy Grace Roman Space Telescope non usa i FITS ma il formato ASDF.
+  Su MAST (archive.stsci.edu, collezione ROMAN) ci sono tre tipi di file:
+    ..._wfi10_f158_cal.asdf     livello 2: UN rivelatore calibrato (4088x4088)
+                                -> usato. Ogni esposizione ha 18 rivelatori
+                                   (wfi01 ... wfi18)
+    ..._f062_coadd.asdf         livello 3: mosaico già combinato -> usato
+    ..._uncal.asdf              livello 1: rampe grezze -> saltato
+    DARK, GRISM, PRISM          calibrazioni e spettri -> saltati
+  Metti i file .asdf nella cartella madre o in una sua sottocartella: all'apertura
+  il programma propone di convertirli. Con "Rinomina e copia" ogni file diventa
+  un FITS nella cartella madre, con il nome di filtro e rivelatore:
+  f158_wfi07.fits (mosaici: f062.fits). Si verifica che i pixel del FITS siano
+  identici a quelli dell'ASDF. I pixel segnati "da non usare" (DO_NOT_USE)
+  nella maschera di qualità diventano "senza dati".
+  Filtri: F062 0,62 µm  F087 0,87  F106 1,06  F129 1,29  F146 1,46
+          F158 1,58  F184 1,84  F213 2,13 µm
+  Coordinate: con le librerie asdf e gwcs (incluse nell'eseguibile) si usa il
+  modello completo dell'ottica, convertito in WCS FITS con correzione SIP.
+  Senza quelle librerie i dati si leggono lo stesso, ma le coordinate sono
+  APPROSSIMATE (dal contorno del campo, senza correzione della distorsione):
+  il programma lo segnala. Nell'intestazione del FITS: ROMANWCS = origine
+  delle coordinate, ORIGFILE = file .asdf originale, ROMANLIV = livello.
+  Dopo la conversione puoi cancellare gli .asdf, ma conviene tenerli: hanno
+  in più gli errori per pixel e tutti i metadati.
+
+File salvati nella cartella madre
+---------------------------------
+  aap_stato.json          tutte le scelte (si riprende da dove si era rimasti)
+  aap_log.txt             registro leggibile delle scelte e cronologia
+  aap_scelte.csv          tabella di tutte le scelte, una riga per file
+                          (separatore ';', si apre con LibreOffice / Excel)
+  stack_bn.*, stack_rgb.*, analisi_*.*, *.csv
+  _aap_cache/             file temporanei (si può cancellare a lavoro finito)
+Le analisi fatte con la versione 1.4 (pipeline_stato.json) si riprendono
+semplicemente aprendo la loro cartella.
+
+Autore e firma
+--------------
+  Il titolo della finestra riporta «AutoAstroPipe (AAP) 2.6 — © 2026 Edoardo Battistel».
+  I FITS salvati hanno nell'intestazione AUTHOR = Edoardo Battistel e
+  CREATOR = AutoAstroPipe 2.6. Con "Firma © sulle immagini salvate" (menu
+  Opzioni, attiva di base) le immagini hanno la scritta «© Edoardo Battistel».
+
+Preferenze: ~/.autoastropipe.json      Errori dell'eseguibile: ~/.autoastropipe.log

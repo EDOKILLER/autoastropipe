@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below, and credit the data providers listed in README.md."
+title: "AutoAstroPipe (AutoAstroPipe (AAP)): from raw FITS images to a scientific analysis, in seven guided steps — any telescope, any band"
+authors:
+  - family-names: Battistel
+    given-names: Edoardo
+version: "2.6"
+date-released: 2026-11-15
+license: BSD-3-Clause
+repository-code: "https://github.com/EDOKILLER/autoastropipe"
+keywords:
+  - FITS
+  - pipeline
+  - image processing
+  - JWST
+  - Hubble
+  - photometry
+  - astropy
